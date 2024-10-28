@@ -9,9 +9,10 @@ description = "A Python package for managing databases with custom logging and u
 readme = "README.md"
 requires-python = ">=3.12"
 keywords = ["database", "mysql", "logger", "management"]
-license = { text = "MIT" }
 
-authors = [{name = "Recitasse"}]
+authors = [
+    {name = "Recitasse"}
+]
 
 urls = { "Homepage" = "https://github.com/Recitasse/OncheDatabase" }
 
@@ -28,4 +29,16 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "isort"
+]
+
+[tool.setuptools]
+packages = ["OncheDatabase"]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.package-data]
+"OncheDatabase" = [
+    "data/inputs/*",
+    "data/outputs/*",
+    "data/reports/*"
 ]

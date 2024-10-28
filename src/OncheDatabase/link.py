@@ -9,7 +9,7 @@ from typing import Any, Union, final
 from mysql.connector import MySQLConnection
 from mysql.connector import connect as connect_server
 
-from _typing import MySQLResults
+from src.OncheDatabase._typing import MySQLResults
 from utils.logger import QUERY_LOG
 
 
