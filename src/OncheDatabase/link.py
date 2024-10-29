@@ -9,8 +9,8 @@ from typing import Any, Union, final
 from mysql.connector import MySQLConnection
 from mysql.connector import connect as connect_server
 
-from src.OncheDatabase._typing import MySQLResults
-from utils.logger import QUERY_LOG
+from OncheDatabase._typing import MySQLResults
+from OncheDatabase.utils.logger import QUERY_LOG
 
 
 __all__ = ['Query', 'Link']

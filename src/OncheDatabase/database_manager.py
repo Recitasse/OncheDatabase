@@ -1,7 +1,7 @@
-from link import Link, Query
-from utils.logger import MANAGER_LOG
+from OncheDatabase.link import Link, Query
+from OncheDatabase.utils.logger import MANAGER_LOG
+from OncheDatabase._typing import MySQLResults
 from dataclasses import dataclass
-from src.OncheDatabase._typing import MySQLResults
 
 
 @dataclass

@@ -1,0 +1,17 @@
+Metadata-Version: 2.1
+Name: OncheDatabase
+Version: 0.4.0
+Summary: A Python package for managing databases with custom logging and utilities.
+Author: Recitasse
+Project-URL: Homepage, https://github.com/Recitasse/OncheDatabase
+Keywords: database,mysql,logger,management
+Classifier: Development Status :: 3 - Alpha
+Classifier: Programming Language :: Python :: 3.12
+Classifier: License :: OSI Approved :: MIT License
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: mysql-connector==2.2.9
+Provides-Extra: dev
+Requires-Dist: isort; extra == "dev"
+
+TEMPLATE
