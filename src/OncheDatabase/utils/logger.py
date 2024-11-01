@@ -30,7 +30,5 @@ def create_custom_logger(name_logger: str = "BDD",
 
     return logger
 
-QUERY_LOG = create_custom_logger("BDD", "query_bdd")
+QUERY_LOG = create_custom_logger("QUERY", "query_bdd")
 MANAGER_LOG = create_custom_logger("MANAGER", "manager_bdd")
-
-__all__ = ['QUERY_LOG', 'MANAGER_LOG']
