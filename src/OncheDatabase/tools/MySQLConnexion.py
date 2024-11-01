@@ -33,7 +33,7 @@ class MySQLConnexion:
                          "     START NEW SESSION      \n"
                          "===========================\n\n")
         #self._password = getpass("Give password to connect to mysql as root: ")
-        self._password = "C98ar5l2a#"
+        self._password = ""
         self._setup_connexion(
             self.user, self.host, self._password, self.database
         )
