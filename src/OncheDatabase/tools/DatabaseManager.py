@@ -88,12 +88,12 @@ class DatabaseManager(MySQLConnexion):
         :return: None
         """
 
-    def change_right_user(self, user: str,
+    def add_right_user(self, user: str,
                           droits: Sequence[str] | str,
                           databases: Sequence[str] | str,
                           localhost: str = "localhost") -> None:
         """
-        Change les droits d'un utilisateur sur les bases de données
+        Ajoute des droits d'un utilisateur sur les bases de données
         Attention les les droits s'appliquent identiquement à toutes les bases
         de donnée citées
         :param user: utilisateur qui récupère les droits
@@ -117,6 +117,38 @@ class DatabaseManager(MySQLConnexion):
             QUERY_LOG.info(query)
             MANAGER_LOG.info(query)
             self.query(query)
+            self.query("FLUSH PRIVILEGES;")
+
+    def revoke_right_user(self, user: str,
+                          droits: Sequence[str] | str,
+                          databases: Sequence[str] | str,
+                          localhost: str = "localhost") -> None:
+        """
+        Retire des droits d'un utilisateur sur les bases de données
+        Attention les les droits s'appliquent identiquement à toutes les bases
+        de donnée citées
+        :param user: utilisateur qui perd les droits
+        :param droits: les droits en question
+        :param localhost: Localhost
+        :param databases: les databases en questions
+        :return: None
+        """
+
+        if not isinstance(droits, Sequence):
+            droits = [droits]
+        for droit in droits:
+            if droit not in Privileges.__members__.values():
+                raise PrivilegeNotFound(droit)
+            if Privileges.GRANT in droits:
+                raise PrivilegeErreur(droit)
+
+        for database in databases:
+            query = (f"REVOKE {', '.join(droits)} ON {database}.* "
+                     f"TO '{user}'@'{localhost}'")
+            QUERY_LOG.info(query)
+            MANAGER_LOG.info(query)
+            self.query(query)
+            self.query("FLUSH PRIVILEGES;")
 
     def show_privileges(self, users: Sequence[str] | str,
                         localhost: str = "localhost") -> Mapping[str, str]:
