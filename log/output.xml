@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.1.1 (Python 3.12.7 on linux)" generated="2025-02-02T15:19:06.747033" rpa="false" schemaversion="5">
+<suite id="s1" name="41001-DATABASE" source="/home/recitasse/Desktop/Onche/TestingOnche/Tests/Test Suites/Database/41001-DATABASE.robot">
+<test id="s1-t1" name="41001-REQ-CONNEXION-DATABASE" line="5">
+<kw name="Log" owner="BuiltIn">
+<msg time="2025-02-02T15:19:06.769655" level="INFO">Connexion à la base de donnée en étant l'utilisateur root</msg>
+<arg>Connexion à la base de donnée en étant l'utilisateur root</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2025-02-02T15:19:06.769343" elapsed="0.000410"/>
+</kw>
+<kw name="Vérifier la connexion à MySQL">
+<msg time="2025-02-02T15:19:06.770355" level="FAIL">No keyword with name 'Vérifier la connexion à MySQL' found.</msg>
+<var>${Connexion}</var>
+<status status="FAIL" start="2025-02-02T15:19:06.770266" elapsed="0.000160">No keyword with name 'Vérifier la connexion à MySQL' found.</status>
+</kw>
+<kw name="Should Be True" owner="BuiltIn">
+<arg>${Connexion}</arg>
+<doc>Fails if the given condition is not true.</doc>
+<status status="NOT RUN" start="2025-02-02T15:19:06.770543" elapsed="0.000064"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<arg>La connexion est réussie</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2025-02-02T15:19:06.770698" elapsed="0.000052"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<arg>Montrer toutes les bases de données concernant Onche</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2025-02-02T15:19:06.770835" elapsed="0.000058"/>
+</kw>
+<kw name="Montrer toutes les bases de donnée de Onche">
+<status status="NOT RUN" start="2025-02-02T15:19:06.770997" elapsed="0.000051"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<arg>Liste de tous les utilisateurs pour onche</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2025-02-02T15:19:06.771127" elapsed="0.000051"/>
+</kw>
+<kw name="Montrer tous les utilisateurs MySQL pour Onche">
+<status status="NOT RUN" start="2025-02-02T15:19:06.771270" elapsed="0.000050"/>
+</kw>
+<doc>Test la connexion à MySQL en étant le root user</doc>
+<tag>Center</tag>
+<tag>Connexion</tag>
+<tag>Database</tag>
+<status status="FAIL" start="2025-02-02T15:19:06.768720" elapsed="0.002728">No keyword with name 'Vérifier la connexion à MySQL' found.</status>
+</test>
+<status status="FAIL" start="2025-02-02T15:19:06.752062" elapsed="0.019753"/>
+</suite>
+<statistics>
+<total>
+<stat pass="0" fail="1" skip="0">All Tests</stat>
+</total>
+<tag>
+<stat pass="0" fail="1" skip="0">Center</stat>
+<stat pass="0" fail="1" skip="0">Connexion</stat>
+<stat pass="0" fail="1" skip="0">Database</stat>
+</tag>
+<suite>
+<stat pass="0" fail="1" skip="0" id="s1" name="41001-DATABASE">41001-DATABASE</stat>
+</suite>
+</statistics>
+<errors>
+<msg time="2025-02-02T15:19:06.767367" level="ERROR">Error in file '/home/recitasse/Desktop/Onche/TestingOnche/robotframework/resource/database.resource' on line 3: Importing library '/home/recitasse/Desktop/Onche/TestingOnche/robotframework/keywords/Database/database_manager.py' failed: ModuleNotFoundError: No module named 'config'
+Traceback (most recent call last):
+  File "/home/recitasse/Desktop/Onche/TestingOnche/robotframework/keywords/Database/database_manager.py", line 2, in &lt;module&gt;
+    from config.GLOBAL import TIME_ENABLED, TRACE_ENABLED
+PYTHONPATH:
+  /home/recitasse/Desktop/Onche/TestingOnche/robotframework/keywords/Database
+  /home/recitasse/.local/share/JetBrains/PyCharmCE2024.2/robotframework-intellij/lib/robotframework_debug_adapter
+  /home/recitasse/Desktop/Onche/OncheDatabase
+  /home/recitasse/.local/share/JetBrains/PyCharmCE2024.2/robotframework-intellij/lib
+  /home/recitasse/.local/share/JetBrains/PyCharmCE2024.2/robotframework-intellij/lib/robotframework_ls/vendored
+  /usr/lib/python312.zip
+  /usr/lib/python3.12
+  /usr/lib/python3.12/lib-dynload
+  /home/recitasse/Desktop/Onche/TestingOnche/robotvenv/lib/python3.12/site-packages
+  /home/recitasse/Desktop/Onche/OncheDatabase/src</msg>
+</errors>
+</robot>

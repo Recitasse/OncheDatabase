@@ -108,7 +108,7 @@ class Link:
                     ind_: Union[int, str] = 0) -> MySQLResults:
         """
         Récupère les résultats des query MySQL avec
-        les paramètres voulus et les indices voulus
+        les paramètres voulu et les indices voulue
         :param query: La query à exécuter
         :param params: Paramètres Tuple
         :param ind_: L'indice de la séquence voulu (all pour tout récupérer)

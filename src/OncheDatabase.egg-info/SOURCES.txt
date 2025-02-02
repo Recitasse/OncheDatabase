@@ -2,7 +2,6 @@ README.md
 pyproject.toml
 src/OncheDatabase/__init__.py
 src/OncheDatabase/_typing.py
-src/OncheDatabase/database_manager.py
 src/OncheDatabase/link.py
 src/OncheDatabase.egg-info/PKG-INFO
 src/OncheDatabase.egg-info/SOURCES.txt

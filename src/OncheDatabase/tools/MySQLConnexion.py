@@ -1,27 +1,37 @@
 from dataclasses import dataclass, field
-from getpass import getpass
 from logging import getLogger
 from inspect import currentframe
 from typing import Any, Optional, Tuple, Union, final
 
-from mysql.connector import MySQLConnection
+from mysql.connector import MySQLConnection as Connexion
 from mysql.connector import connect as connect_server
 
 from OncheDatabase._typing import MySQLResults
-
 
 QUERY_LOG = getLogger("QUERY")
 MANAGER_LOG = getLogger("MANAGER")
 
 
-@dataclass(init=True)
+@dataclass(init=True, order=False, repr=True)
 class MySQLConnexion:
-    user: str = field(init=False, default="root")
-    host: str = field(init=False, default="localhost")
-    database: Optional[str] = field(init=True, default=None)
-    _password: str = field(init=False, default="")
+    user: str = field(
+        init=False, default="root", hash=True, repr=True,
+        metadata={"description": "user name"}
+    )
+    host: str = field(
+        init=False, default="localhost", hash=True, repr=True,
+        metadata={"description": "localhost name"}
+    )
+    database: Optional[str] = field(
+        init=False, default=None, hash=True, repr=True,
+        metadata={"description": "Database name"}
+    )
+    _password: str = field(
+        init=False, hash=True, repr=True,
+        metadata={"description": "password of mysql"}
+    )
 
-    connexion: MySQLConnection = field(default=None, init=False)
+    connexion: Connexion = field(default=None, init=False)
     cursor: Any = None
 
     def __post_init__(self) -> None:
@@ -57,13 +67,15 @@ class MySQLConnexion:
             self.connexion = connect_server(
                 host=host,
                 user=user,
-                database=database if database else "",
                 password=password,
                 auth_plugin='mysql_native_password'
             )
             MANAGER_LOG.info(f"\n\n     °˖✧◝(⁰▿⁰)◜✧˖°     \n\n"
                              f"Connexion à mysql effectuée.\n"
                              f"SESSION HAS STARTED AS {user}")
+            if database:
+                self.database = database
+                self.connexion.database = database
         except Exception as e:
             MANAGER_LOG.error(f"\n\n     (┛◉Д◉)┛彡┻━┻      \n\n"
                               f"Impossible de se connecter à mysql.\n"
@@ -73,7 +85,7 @@ class MySQLConnexion:
 
     @final
     def query(self, query: str,
-              values: Optional[Tuple[Any]] = None) -> MySQLResults:
+              values: Optional[Tuple[Any, ...]] = None) -> MySQLResults:
         """
         Execute the query with the provided values.
         :param query: The SQL query to execute

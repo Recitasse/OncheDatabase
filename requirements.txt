@@ -1,0 +1,6 @@
+isort==5.13.2
+mysql-connector==2.2.9
+pip~=24.0
+Jinja2~=3.1.4
+OncheDatabase~=0.4.0
+Flask~=3.0.3

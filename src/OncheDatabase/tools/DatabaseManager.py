@@ -1,10 +1,16 @@
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Optional, Union, Sequence
+from functools import singledispatchmethod
+from typing import Optional, Union, Sequence, Mapping
 from OncheDatabase._typing import MySQLResults
-from OncheDatabase.tools.MySQLConnexion import MySQLConnexion, QUERY_LOG, MANAGER_LOG
+from OncheDatabase.elements.Database import Database
+from OncheDatabase.tools.MySQLConnexion import (MySQLConnexion,
+                                                QUERY_LOG, MANAGER_LOG)
+from OncheDatabase.utils.privileges import Privileges
+from OncheDatabase.utils.errors import PrivilegeNotFound, PrivilegeErreur
 from typing import Tuple, ClassVar
 
+__all__ = ['DatabaseManager']
 
 @dataclass(init=True)
 class DatabaseManager(MySQLConnexion):
@@ -16,7 +22,7 @@ class DatabaseManager(MySQLConnexion):
 
     def get_all_database(self, startswith: Optional[str] = None,
                          endswith: Optional[str] = None,
-                         contains: Optional[str] = None) -> MySQLResults:
+                         contains: Optional[str] = "Onch") -> MySQLResults:
         """
         Récupère toutes les bases de données avec des patern donnés
         :param startswith: patern de début
@@ -28,6 +34,24 @@ class DatabaseManager(MySQLConnexion):
             query = f"SHOW DATABASES;"
         else:
             query = (f"SHOW DATABASES LIKE "
+                     f"{self.pattern(startswith, endswith, contains)};")
+        QUERY_LOG.info(query)
+        return self.query(query)
+
+    def get_all_users(self, startswith: Optional[str] = None,
+                         endswith: Optional[str] = None,
+                         contains: Optional[str] = "Onch") -> MySQLResults:
+        """
+        Récupère tous les noms d'utilisateur
+        :param startswith: patern de début
+        :param endswith: patern de fin
+        :param contains: patern interne
+        :return: Résultats de la query
+        """
+        if not startswith or not endswith or not contains:
+            query = f"SELECT user FROM mysql.user;"
+        else:
+            query = (f"SELECT user FROM mysql.user LIKE"
                      f"{self.pattern(startswith, endswith, contains)};")
         QUERY_LOG.info(query)
         return self.query(query)
@@ -55,6 +79,64 @@ class DatabaseManager(MySQLConnexion):
         self._setup_connexion(
             user=user, host=host, password=password, database=database
         )
+
+    def create_user(self, user: str, host: str = "localhost") -> None:
+        """
+        Créer un utilisateur dans la base de donnée
+        :param user: Nom utilisateur
+        :param host: hostname
+        :return: None
+        """
+
+    def change_right_user(self, user: str,
+                          droits: Sequence[str] | str,
+                          databases: Sequence[str] | str,
+                          localhost: str = "localhost") -> None:
+        """
+        Change les droits d'un utilisateur sur les bases de données
+        Attention les les droits s'appliquent identiquement à toutes les bases
+        de donnée citées
+        :param user: utilisateur qui récupère les droits
+        :param droits: les droits en question
+        :param localhost: Localhost
+        :param databases: les databases en questions
+        :return: None
+        """
+
+        if not isinstance(droits, Sequence):
+            droits = [droits]
+        for droit in droits:
+            if droit not in Privileges.__members__.values():
+                raise PrivilegeNotFound(droit)
+            if Privileges.GRANT in droits:
+                raise PrivilegeErreur(droit)
+
+        for database in databases:
+            query = (f"GRANT {', '.join(droits)} ON {database}.* "
+                     f"TO '{user}'@'{localhost}'")
+            QUERY_LOG.info(query)
+            MANAGER_LOG.info(query)
+            self.query(query)
+
+    def show_privileges(self, users: Sequence[str] | str,
+                        localhost: str = "localhost") -> Mapping[str, str]:
+        """
+        Montre les privilèges des utilisateurs
+        :param users: les utilisateurs selectionnés
+        :param localhost: localhost du serveur
+        :return: liste des privilèges des utilsateurs
+        """
+        user_dict = {}
+        for user in users:
+            query = "SHOW GRANTS FOR %s@%s;"
+            QUERY_LOG.info(query)
+            MANAGER_LOG.info(query)
+            privileges = self.get_results(
+                query, params=(user, localhost), ind_="all"
+            )
+            user_dict.update({user: privileges})
+        return user_dict
+
 
     def delete_users(self, user: str, host: str = "localhost") -> None:
         """
@@ -87,7 +169,7 @@ class DatabaseManager(MySQLConnexion):
             MANAGER_LOG.error(f"Impossible de supprimer {name}.")
             return
         if name:
-            if name not in self.get_all_database():
+            if name not in self:
                 MANAGER_LOG.info(f"La base de donnée {name} n'existe pas.")
                 return
             query = f"DROP DATABASE {name};"
@@ -135,6 +217,9 @@ class DatabaseManager(MySQLConnexion):
         :param user: Nom de l'utilisateur (default root)
         :return: None
         """
+        if database not in self:
+            MANAGER_LOG.warning(f"La base de donnée {database} n'existe pas.")
+            return
 
         if isinstance(user, str):
             user = [user]
@@ -149,24 +234,6 @@ class DatabaseManager(MySQLConnexion):
                     f"Privilèges donnés à {us} pour {ddb}.")
         self.query("FLUSH PRIVILEGES;")
 
-    def show_privileges(self,
-                        name: Union[str, Iterable[str]] = "root") -> str:
-        """
-        Montre les privilèges d'une base de donnée
-        :param name: Nom de la base de donnée
-        :return: None
-        """
-        if isinstance(name, str):
-            name = [name]
-
-        for nm in name:
-            query = (f"SELECT * FROM information_schema.SCHEMA_PRIVILEGES "
-                     f"WHERE TABLE_SCHEMA = '{nm}'")
-            QUERY_LOG.info(f"Demande de visibilité sur les privilèges "
-                           f"demandé sur {nm}.")
-            return self.query(query)
-
-
     @staticmethod
     def pattern(startswith: Optional[str] = None,
                 endswith: Optional[str] = None,
@@ -179,3 +246,24 @@ class DatabaseManager(MySQLConnexion):
         if endswith:
             pattern += f'{endswith}'
         return f"'{pattern}'"
+
+    @singledispatchmethod
+    def __contains__(self, item) -> bool:
+        return NotImplemented(f"{type(item)} is not supported.")
+
+    @__contains__.register(str)
+    def _(self, item: str) -> bool:
+        return item in self.get_all_database()
+
+    @__contains__.register(Database)
+    def _(self, item: Database) -> bool:
+        return item.database_name in self.get_all_database()
+
+    def __iter__(self) -> Iterable:
+        return self.get_all_database().__iter__()
+
+    def __bool__(self) -> bool:
+        """
+        :return: Return true if DatabaseManager is active
+        """
+        return True if self.connexion else False

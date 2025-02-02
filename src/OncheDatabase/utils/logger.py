@@ -9,7 +9,7 @@ def create_custom_logger(name_logger: str = "BDD",
     :param file_name: nom du fichier
     :return: Logger
     """
-    logger = logging.getLogger(f"{name_logger}.log")
+    logger = logging.getLogger(f"logs/{name_logger}.log")
     logger.setLevel(logging.DEBUG)
 
     ch = logging.StreamHandler()
