@@ -26,9 +26,7 @@ class File(ABC, str):
 
 
 class SqlFile(File):
-    EXTENSION: str = "sql"
-
     @classmethod
     def _check_file_extension(cls, path: str) -> None:
-        if Path(path).suffix != f".{cls.EXTENSION}":
+        if Path(path).suffix != ".sql":
             raise TypeError(f"L'extension du fichier est incohérent")
