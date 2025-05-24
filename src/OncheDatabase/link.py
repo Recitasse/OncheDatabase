@@ -4,7 +4,7 @@ from enum import StrEnum
 from inspect import currentframe
 from os.path import join as join_path
 from subprocess import run as run_subprocess
-from typing import Any, Union, Optional
+from typing import Union, Optional
 
 from mysql.connector import MySQLConnection
 from mysql.connector.connection import MySQLCursor
