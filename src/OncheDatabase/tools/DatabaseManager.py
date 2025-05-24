@@ -1,8 +1,8 @@
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Optional, Union, Sequence
-from OncheDatabase._typing import MySQLResults
-from OncheDatabase.tools.MySQLConnexion import MySQLConnexion, QUERY_LOG, MANAGER_LOG
+from typing import Optional, Union
+from src.OncheDatabase._typing import MySQLResults
+from src.OncheDatabase.tools.MySQLConnexion import MySQLConnexion, QUERY_LOG, MANAGER_LOG
 from typing import Tuple, ClassVar
 
 
@@ -165,6 +165,7 @@ class DatabaseManager(MySQLConnexion):
             QUERY_LOG.info(f"Demande de visibilité sur les privilèges "
                            f"demandé sur {nm}.")
             return self.query(query)
+        return ""
 
 
     @staticmethod

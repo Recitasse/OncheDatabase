@@ -7,7 +7,7 @@ from typing import Any, Optional, Tuple, Union, final
 from mysql.connector import MySQLConnection
 from mysql.connector import connect as connect_server
 
-from OncheDatabase._typing import MySQLResults
+from src.OncheDatabase._typing import MySQLResults
 
 
 QUERY_LOG = getLogger("QUERY")
@@ -99,7 +99,7 @@ class MySQLConnexion:
 
     @final
     def get_results(self, query: str, params: tuple = None,
-                    ind_: Union[int, str] = 0) -> MySQLResults:
+                    ind_: Union[int, str] = 0) -> MySQLResults | None:
         """
         Récupère les résultats des query MySQL avec
         les paramètres voulu et les indices voulue
@@ -152,6 +152,7 @@ class MySQLConnexion:
                 f"Impossible de récupérer l'indice {ind_} "
                 f"du résultat de la requête select."
             )
+        return None
 
     def __enter__(self):
         """

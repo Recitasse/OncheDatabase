@@ -4,13 +4,15 @@ from enum import StrEnum
 from inspect import currentframe
 from os.path import join as join_path
 from subprocess import run as run_subprocess
-from typing import Any, Union, final
+from typing import Any, Union, Optional
 
 from mysql.connector import MySQLConnection
+from mysql.connector.connection import MySQLCursor
 from mysql.connector import connect as connect_server
 
-from OncheDatabase._typing import MySQLResults
-from OncheDatabase.utils.logger import QUERY_LOG
+from src.OncheDatabase._typing import MySQLResults
+from src.OncheDatabase.utils.logger import QUERY_LOG
+from src.OncheDatabase.tools.File import SqlFile
 
 
 __all__ = ['Query', 'Link']
@@ -23,12 +25,6 @@ class Query(StrEnum):
     DATABASES = "SHOW DATABASES;"
 
 
-class BddPath(StrEnum):
-    OUTPUTS = r"data/outputs/"
-    INPUTS = r"data/inputs/"
-    REPORTS = r"data/reports/"
-
-
 @dataclass(init=True)
 class Link:
     user: str = field(default="Onche", init=True)
@@ -37,7 +33,7 @@ class Link:
     _password: str = field(default="", init=True)
 
     connexion: MySQLConnection = None
-    cursor: Any = None
+    cursor: Optional[MySQLCursor] = None
 
     _verbose: bool = field(default=False, init=True)
 
@@ -54,14 +50,15 @@ class Link:
         )
         QUERY_LOG.info("Connexion à la base de donnée réussie.")
 
-    def exporter_bdd(self, as_name: str = "bdd") -> None:
+    def exporter_bdd(self, path_output: str, as_name: str = "bdd") -> None:
         """
         Exporte la base de donnée actuelle
+        :param path_output: output path
         :param as_name: Le nom de la base de donnée
         :return: None
         """
         date = datetime.now().strftime("%d_%m_%Y-%H-%M-%S")
-        file_name = join_path(BddPath.OUTPUTS, f'{as_name}_{date}.sql')
+        file_name = join_path(SqlFile(path_output), f'{as_name}_{date}.sql')
         try:
             run_subprocess(
                 f"mysqldump -u{self.user} -p{self._password} "
@@ -81,7 +78,17 @@ class Link:
                 f"Impossible d'exporter la BDD {self.database} : {e}"
             )
 
-    @final
+    def call_routine(self, routine: str, *args) -> Optional[tuple]:
+        """
+        Execute une routine donnée
+        :param routine: nom de la routine à executer
+        :return:
+        """
+        with self as cursor:
+             res = cursor.callproc(routine, args)
+        return res
+
+
     def query(self, query: str, values: tuple = None) -> MySQLResults:
         """
         Execute la query demandée avec la valeur demandée
@@ -103,9 +110,9 @@ class Link:
             ]
         return results_
 
-    @final
+
     def get_results(self, query: str, params: tuple = None,
-                    ind_: Union[int, str] = 0) -> MySQLResults:
+                    ind_: Union[int, str] = 0) -> MySQLResults | None:
         """
         Récupère les résultats des query MySQL avec
         les paramètres voulu et les indices voulue
@@ -158,6 +165,7 @@ class Link:
                 f"Impossible de récupérer l'indice {ind_} "
                 f"du résultat de la requête select."
             )
+        return None
 
     @property
     def size(self) -> MySQLResults:
