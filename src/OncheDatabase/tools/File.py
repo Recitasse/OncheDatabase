@@ -1,3 +1,7 @@
+"""
+Module facilitant le traitement de dossier avec des extensisons précises
+"""
+
 from pathlib import Path
 from abc import ABC, abstractmethod
 

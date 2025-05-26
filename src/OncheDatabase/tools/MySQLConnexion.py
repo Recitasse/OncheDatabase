@@ -1,21 +1,24 @@
 from dataclasses import dataclass, field
 from getpass import getpass
-from logging import getLogger
+from src.OncheDatabase.utils.logger import QUERY_LOG, MANAGER_LOG
 from inspect import currentframe
 from typing import Any, Optional, Tuple, Union, final
 
 from mysql.connector import MySQLConnection
-from mysql.connector import connect as connect_server
+from mysql.connector import connect
 
 from src.OncheDatabase._typing import MySQLResults
 
 
-QUERY_LOG = getLogger("QUERY")
-MANAGER_LOG = getLogger("MANAGER")
-
-
 @dataclass(init=True)
 class MySQLConnexion:
+    """
+    Objet de la connexion MySQL avec les différentes configurations données
+    :param user: Nom de l'utilisateur se connectant lors de la session MySQL
+    :param host:
+    :param database:
+    :param _password:
+    """
     user: str = field(init=False, default="root")
     host: str = field(init=False, default="localhost")
     database: Optional[str] = field(init=True, default=None)
@@ -32,32 +35,28 @@ class MySQLConnexion:
         MANAGER_LOG.info("\n\n===========================\n"
                          "     START NEW SESSION      \n"
                          "===========================\n\n")
-        #self._password = getpass("Give password to connect to mysql as root: ")
-        self._password = ""
+        self._password = "C98ar5l2a#"
         self._setup_connexion(
-            self.user, self.host, self._password, self.database
+            self.user, self.host, self._password
         )
 
     def _setup_connexion(self, user: Optional[str] = None,
                          host: Optional[str] = None,
-                         password: Optional[str] = None,
-                         database: Optional[str] = None) -> None:
+                         password: Optional[str] = None) -> None:
         """
         Met en place la connexion avec les paramètres souhaités
         :param user: Utilisateur de la base de donnée
         :param host: Host de la base de donnée
         :param password: mdp de l'utilisateur
-        :param database: nom de la base de donnée
         :return: None
         """
         self.user = user if user else self.user
         self.host = host if host else self.host
         self._password = password if password else self._password
         try:
-            self.connexion = connect_server(
+            self.connexion = connect(
                 host=host,
                 user=user,
-                database=database if database else "",
                 password=password,
                 auth_plugin='mysql_native_password'
             )
@@ -70,6 +69,20 @@ class MySQLConnexion:
                               f"\n{e}"
                               f"\nCOULD NOT START SESSION AS {user}")
             raise Exception(e)
+
+    @final
+    def change_users(self, user: str, password: str,
+                        host: str = "localhost") -> None:
+        """
+        Change l'utilisateur de la base de donnée
+        :param user: nom de l'utilisateur
+        :param password: mdp de la bdd
+        :param host: host de la bdd
+        """
+        MANAGER_LOG.warning(f"Changement d'utilisateur : {user}")
+        self._setup_connexion(
+            user=user, host=host, password=password
+        )
 
     @final
     def query(self, query: str,
@@ -98,14 +111,25 @@ class MySQLConnexion:
         return results_
 
     @final
+    def call_routine(self, routine: str, *args) -> Optional[tuple]:
+        """
+        Execute une routine donnée
+        :param routine: nom de la routine à executer
+        :return:
+        """
+        with self as cursor:
+             res = cursor.callproc(routine, args)
+        return res
+
+    @final
     def get_results(self, query: str, params: tuple = None,
-                    ind_: Union[int, str] = 0) -> MySQLResults | None:
+                    g_index: Union[int, str] = 0) -> MySQLResults | None:
         """
         Récupère les résultats des query MySQL avec
         les paramètres voulu et les indices voulue
         :param query: La query à exécuter
         :param params: Paramètres Tuple
-        :param ind_: L'indice de la séquence voulu (all pour tout récupérer)
+        :param g_index: L'indice de la séquence voulu (all pour tout récupérer)
         :return: Resultas SQL
         """
         with self as cursor:
@@ -115,9 +139,9 @@ class MySQLConnexion:
                 cursor.execute(query)
             results = cursor.fetchall()
 
-        if isinstance(ind_, str):
+        if isinstance(g_index, str):
             vals = []
-            if ind_ == "all":
+            if g_index == "all":
                 for value in results:
                     if len(value) > 1:
                         cco_name = currentframe().f_back.f_code.co_name
@@ -133,23 +157,23 @@ class MySQLConnexion:
                 QUERY_LOG.warning(
                     "La l'indice demandé est erroné, indice 0 par défaut."
                 )
-                ind_ = 0
+                g_index = 0
 
-        if isinstance(ind_, int):
-            if ind_ == 0:
+        if isinstance(g_index, int):
+            if g_index == 0:
                 if results:
                     return results[0][0]
                 return []
-            elif ind_ > 0:
+            elif g_index > 0:
                 vals = [value[0] for value in results]
-                return vals[0][ind_]
+                return vals[0][g_index]
         else:
             QUERY_LOG.error(
                 "Impossible de demander un indice autre qu'un "
                 "entier ou exceptionnellement 'all'."
             )
             raise ValueError(
-                f"Impossible de récupérer l'indice {ind_} "
+                f"Impossible de récupérer l'indice {g_index} "
                 f"du résultat de la requête select."
             )
         return None
@@ -184,4 +208,4 @@ class MySQLConnexion:
             if self.cursor is not None:
                 raise ValueError("MySQL cursor was not closed properly.")
 
-__all__ = ["MySQLConnexion", "MANAGER_LOG", "QUERY_LOG"]
+__all__ = ["MySQLConnexion"]

@@ -1,34 +1,42 @@
 import logging
+from os.path import join, abspath, exists, dirname
+from os import makedirs
 
 
-def create_custom_logger(name_logger: str = "BDD",
-                         file_name: str = "bdd.log") -> logging.Logger:
+BASE_DIR = dirname(abspath(__file__))
+LOG_FOLDER = join(BASE_DIR, "..", "log")
+
+if not exists(LOG_FOLDER):
+    makedirs(LOG_FOLDER)
+
+def create_custom_logger(name_logger: str = "BDD") -> logging.Logger:
     """
     Créer le logger au format bdd
     :param name_logger: nom du logger
-    :param file_name: nom du fichier
     :return: Logger
     """
-    logger = logging.getLogger(f"{name_logger}.log")
+    logger = logging.getLogger(name_logger)
     logger.setLevel(logging.DEBUG)
 
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
+    if not logger.handlers:
+        logger_file = join(LOG_FOLDER, f"{name_logger}.log")
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
 
-    fh = logging.FileHandler(file_name)
-    fh.setLevel(logging.INFO)
+        fh = logging.FileHandler(logger_file)
+        fh.setLevel(logging.INFO)
 
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
 
-    ch.setFormatter(formatter)
-    fh.setFormatter(formatter)
+        ch.setFormatter(formatter)
+        fh.setFormatter(formatter)
 
-    logger.addHandler(ch)
-    logger.addHandler(fh)
+        logger.addHandler(ch)
+        logger.addHandler(fh)
 
     return logger
 
-QUERY_LOG = create_custom_logger("QUERY", "query_bdd")
-MANAGER_LOG = create_custom_logger("MANAGER", "manager_bdd")
+QUERY_LOG = create_custom_logger("QUERY")
+MANAGER_LOG = create_custom_logger("MANAGER")
