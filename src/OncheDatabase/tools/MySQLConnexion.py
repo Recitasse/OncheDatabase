@@ -35,7 +35,7 @@ class MySQLConnexion:
         MANAGER_LOG.info("\n\n===========================\n"
                          "     START NEW SESSION      \n"
                          "===========================\n\n")
-        self._password = "C98ar5l2a#"
+        self._password = ""
         self._setup_connexion(
             self.user, self.host, self._password
         )
